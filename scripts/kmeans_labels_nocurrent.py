@@ -64,9 +64,32 @@ df103 = pd.read_csv("/Users/stephey/Dropbox/NERSC/Work/Dates/20200409/summary_q1
                     names=["Num Zero Crossings", "Duration (pts)", "Umax^2",
                            "Urms^2", "Mean Freq (Hz)", "Mag Current (A)", "Abs Start Point"])
 
-#plot the last column, which is event starting point
-#the index is okay-- corresponds to the index of the image
+#maxim would like to exclude amplitude and current (anything that correlates to ramp time)
 
+#Would it be possible to see if clustering occurs when only quantities not 
+#obviously dependent on the magnet current are considered? Such as mean 
+#frequency, or ratio of (N zero crossings)/(U maX^2), or maybe  of 
+#(N zero crossings)/ (duration)?
+
+#add some other columns that maxim suggests
+#won't add zero crossings/duration since we already have both of those orig columns
+
+ratio_umax_003 = df003['Num Zero Crossings']/df003['Umax^2']
+ratio_umax_103 = df103['Num Zero Crossings']/df103['Umax^2']
+
+df003['Ratio Umax'] = ratio_umax_003
+df103['Ratio Umax'] = ratio_umax_103
+
+#delete other columns maxim suggests
+del df003['Umax^2']
+del df003['Urms^2']
+del df003['Mag Current (A)']
+del df003['Abs Start Point']
+
+del df103['Umax^2']
+del df103['Urms^2']
+del df103['Mag Current (A)']
+del df103['Abs Start Point']
 
 #get the mean and std for each quench dataset
 q003_mean = df003.mean()
@@ -81,9 +104,8 @@ q103_norm = (df103 - q103_mean)/q103_std
 
 #merge into one large dataframe
 norm_all = pd.concat([q003_norm, q103_norm],axis=0)
-
-#use PCA to reduce dimensionality
-pca = PCA(n_components=7)
+#4 columns in this dataset
+pca = PCA(n_components=4)
 pca_data = pca.fit(norm_all)
 print(pca.explained_variance_ratio_)
 #[n_components, n_features]
@@ -91,18 +113,7 @@ print(pca.explained_variance_ratio_)
 comps = abs(pca.components_)
 print(comps)
 
-#from the abs(pca.componenets_) we can tell which data contribute
-#for pca1, cols0-3 are the most important
-#num zero crossings, duration of event, (Umax^2), (Urms^2)
 
-#for pca2, cols6-7 are the most important
-#magnet current(A),Absolute event starting point (#)
-
-#for pca3, col 4 is the most important
-#Mean frequency (Hz)
-
-
-#looks like our data can be well-described in 3 dimensions
 reduced_data = PCA(n_components=3).fit_transform(norm_all)
 
 #now put pca data into kmeans clustering algorithm
@@ -164,22 +175,22 @@ for name, est in estimators:
 #break into labels for each quench
 q003_labels = labels[0:3151]
 q103_labels = labels[3151::]
-    
-fig = plt.figure()
-plt.plot(df003['Abs Start Point'],q003_labels,'.')    
-    
-fig = plt.figure()
-plt.plot(df103['Abs Start Point'],q103_labels,'.')    
+#    
+#fig = plt.figure()
+#plt.plot(df003['Abs Start Point'],q003_labels,'.')    
+#    
+#fig = plt.figure()
+#plt.plot(df103['Abs Start Point'],q103_labels,'.')    
 
 #write label data to file so we can use later
 
-np.save('q003_kmeans_labels.npy',q003_labels)
-np.save('q103_kmeans_labels.npy',q103_labels)    
+np.save('q003_kmeans_labels_nocurrent.npy',q003_labels)
+np.save('q103_kmeans_labels_nocurrent.npy',q103_labels)    
 
 #also save to human readable csv files
 
-np.savetxt("q003_kmeans_labels.csv", q003_labels, delimiter="\n")   
-np.savetxt("q103_kmeans_labels.csv", q103_labels, delimiter="\n") 
+np.savetxt("q003_kmeans_labels_nocurrent.csv", q003_labels, delimiter="\n")   
+np.savetxt("q103_kmeans_labels_nocurrent.csv", q103_labels, delimiter="\n") 
 
 
 
