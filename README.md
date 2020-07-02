@@ -21,7 +21,7 @@ M. Marchevsky.
 
 ## conv2d-autoencoder
 
-Jupyter notebooks designed to build and train a 2D convolustional autoencoder
+Jupyter notebooks designed to build and train a 2D convolutional autoencoder
 to learn features in our unlabeled spectrograms. Several scripts to prepare the
 data, several scripts to build and train the network, and several scripts to
 plot and analyze the encoded data produced by the trained network.
@@ -50,11 +50,11 @@ plot_conv2d_spectrograms.ipynb
 
 ```
 
-## Disclaimer:
+## Disclaimer
 
 These scripts and notebooks will not work "out of the box" since filepaths are
 hardcoded for NERSC's corigpu system and file locations may change, but
-hoepfully the general ideas and techniques we used are clear and can be helpful
+hopefully the general ideas and techniques we used are clear and may be helpful
 to others.
 
 
